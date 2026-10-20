@@ -1,48 +1,109 @@
-<p align="center"><img src="assets/ImpactSeg.png" alt="IMPACT-Seg logo" width="240"></p>
+<p align="center"><img src="assets/ImpactSeg.png" alt="IMPACT-Seg" width="220"></p>
+
 <h1 align="center">IMPACT-Seg</h1>
-<p align="center">Dense anatomical segmentation across CT, CBCT and MRI, with one model and one label set.</p>
 
-IMPACT-Seg segments **131 anatomical structures** (organs, vessels, muscles, vertebrae and ribs by level, head-and-neck structures) on **CT, cone-beam CT and MRI** with the same network and the same labels. It was built for radiotherapy imaging, where the same patient is seen on a planning CT, daily CBCTs and MRI. The models are trained with [KonfAI](https://github.com/fideus-labs/KonfAI) and run with a plain `konfai PREDICTION`.
+<p align="center"><b>One model. One label set. CT, CBCT and MRI.</b><br>
+Dense whole-body anatomy in about 30 seconds, built for radiotherapy imaging.</p>
 
-> **Status:** private preview. The manuscript is in preparation. Research use only, not a clinically validated device.
+<p align="center">
+  <a href="https://huggingface.co/datasets/HCedric/IMPACTSeg"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20dataset%20%26%20models-HCedric%2FIMPACTSeg-ffcc4d" alt="Hugging Face"></a>
+  <a href="https://github.com/fideus-labs/KonfAI"><img src="https://img.shields.io/badge/built%20with-KonfAI-3b82f6" alt="KonfAI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/code-Apache--2.0-22c55e" alt="Apache-2.0"></a>
+  <img src="https://img.shields.io/badge/paper-in%20preparation-9ca3af" alt="Paper in preparation">
+</p>
 
-## Models
+<table>
+<tr>
+<td width="38%" align="center"><img src="assets/anatomy_3d.png" alt="131 structures segmented on a whole-body CT"></td>
+<td>
 
-Two networks are released, each as five folds trained on different patient splits. Both predict the same 131 structures and are equally supported:
+IMPACT-Seg segments **131 anatomical structures** with the same network on **planning CT, cone-beam CT and MRI**:
+abdominal and thoracic organs, the five lung lobes, heart chambers and great vessels, **every vertebra and rib by
+level**, pelvic and limb bones, trunk muscles, and head-and-neck organs at risk.
 
-| Network | Input / patch | Normalization | Size / fold | Whole-body CT (A6000, fresh process) |
-|---|---|---|---:|---|
-| **2.5D** residual-encoder U-Net | 5 adjacent axial slices, 288 × 288 | BatchNorm | 411 MB | ≈ 28 s, 5.5 GB GPU |
-| **3D** residual-encoder U-Net | 128 × 128 × 128 | InstanceNorm | 1.2 GB | ≈ 32 s, 4.3 GB GPU |
+- **One model for three modalities.** No modality flag, no per-modality fine-tuning, the same 131 labels everywhere.
+- **Robust on CBCT.** From CT to the paired CBCT, the Dice drops by about **0.02**, against **0.15–0.18** for CT-only
+  whole-body tools; on real CBCT it reaches **0.84**, where the best competitor reaches 0.67.
+- **Consistent across modalities.** The same patient gets the same anatomy on CT, CBCT and MRI, which is what
+  adaptive radiotherapy needs.
+- **Fast.** A whole-body CT in about 30 s on one GPU with 4–6 GB of memory, all 131 structures at once.
+- **A representation, not only a segmentation.** Used as the similarity of a registration, it ranks **first on both
+  multimodal Learn2Reg tasks** (MRI–CT and CBCT–CT, [below](#registration-learn2reg)).
+- **Open.** Data, weights and code: two networks (2.5D and 3D) × five folds, run with a plain `konfai PREDICTION`.
 
-Weights, labels and ready-to-run configurations are hosted with the dataset on Hugging Face: [`HCedric/IMPACTSeg`](https://huggingface.co/datasets/HCedric/IMPACTSeg) (`models/`).
+<sub>Left: 3D network on a held-out whole-body CT (anterior and oblique views; lungs and large muscles translucent).</sub>
 
-## Quick start: segment a volume
+</td>
+</tr>
+</table>
+
+<p align="center"><img src="assets/multimodal.png" alt="IMPACT-Seg 3D on CT, simulated and real CBCT, and external whole-body MRI" width="100%"></p>
+<p align="center"><sub>Out-of-fold predictions of the 3D network: whole-body CT, CBCT simulated from a whole-body CT, real thoracic CBCT,
+and a whole-body MRI from an external dataset (five-fold ensemble).</sub></p>
+
+## Quick start
 
 ```bash
-# 1. Environment: KonfAI with NIfTI support (reference: Python 3.11, KonfAI 1.8.3, PyTorch 2.14)
+# 1. KonfAI with NIfTI support (reference: Python 3.11, KonfAI 1.8.3, PyTorch 2.14)
 pip install "konfai[itk]==1.8.3" huggingface_hub
 
-# 2. Weights (here the 3D network; use models/2_5D/** for the 2.5D network)
+# 2. Weights from Hugging Face (3D network; use models/2_5D/** for the 2.5D one)
 python -c "from huggingface_hub import snapshot_download; snapshot_download('HCedric/IMPACTSeg', repo_type='dataset', local_dir='hub', allow_patterns=['models/*', 'models/3D/**'])"
 
-# 3. Volumes to segment (CT, CBCT or MRI, any orientation), in KonfAI's layout: Dataset/<case>/image.nii.gz
-# 4. From the root of this repository (KonfAI imports impactseg_v2 from the working directory):
+# 3. Your volumes (CT, CBCT or MRI, any orientation): Dataset/<case>/image.nii.gz
+# 4. From the root of this repository:
 konfai PREDICTION --config configs/predict_3d.yml --models hub/models/3D/fold1/fold1.pt --gpu 0
 
-# Five-fold ensemble (softmax average), recommended on new data:
+#    or the five-fold ensemble, recommended on new data:
 konfai PREDICTION --config configs/predict_3d.yml --models hub/models/3D/fold{1,2,3,4,5}/fold*.pt --gpu 0
 ```
 
-Label maps are written to `Predictions/IMPACTSeg_3D/Segmentations/<case>/mask_fine.nii.gz` in the geometry of the input image; label names are in [`configs/labels.json`](configs/labels.json). The configuration contains the whole pipeline (reorientation, z-score normalization, resampling to 1.5 × 1.5 × 2 mm, sliding window with confidence-based patch fusion, return to the native grid).
+You get `Predictions/IMPACTSeg_3D/Segmentations/<case>/mask_fine.nii.gz`, a label map on the grid of your image;
+names are in [`configs/labels.json`](configs/labels.json). Everything happens inside the configuration:
+reorientation, z-score normalization (no HU window, any modality), resampling to 1.5 × 1.5 × 2 mm, sliding-window
+inference with confidence-based patch fusion, and return to the native grid.
+
+## Models
+
+| | Input | Patch | Normalization | Checkpoint | Whole-body CT (RTX A6000) |
+|---|---|---|---|---:|---|
+| **IMPACT-Seg 2.5D** | 5 adjacent axial slices | 288 × 288 | BatchNorm | 411 MB | ≈ 28 s · 5.5 GB |
+| **IMPACT-Seg 3D** | volume | 128 × 128 × 128 | InstanceNorm | 1.2 GB | ≈ 32 s · 4.3 GB |
+
+Both are six-stage residual-encoder U-Nets with 132 outputs (background + 131 structures), trained for 2 M
+iterations on the IMPACT-Seg dataset (CT, real and simulated CBCT, MRI), as five folds on different patient splits. The 3D network is
+the more accurate of the two; the 2.5D network is lighter. Any single fold is a complete model; the five-fold
+ensemble is the most accurate option on new data.
+
+## Registration (Learn2Reg)
+
+Because IMPACT-Seg gives the same dense anatomy on every modality, its predictions can serve as the similarity of a
+multimodal registration: the IMPACT-Seg 3D segmentations of the two images drive an instance optimisation
+(ConvexAdam or Elastix initialisation, then Adam refinement of a soft Dice between the predicted structures). On the official
+Learn2Reg test leaderboards:
+
+| Task | Entry | Dice ↑ | HD95 (mm) ↓ |
+|---|---|---:|---:|
+| [**AbdomenMRCT**](https://learn2reg.grand-challenge.org/evaluation/test/leaderboard/) · MRI–CT | 🥇 **IMPACT-Seg** | **0.917** | **2.24** |
+| | 2nd entry | 0.915 | 2.73 |
+| | corrField (organisers) | 0.876 | 4.40 |
+| [**ThoraxCBCT**](https://learn2reg.grand-challenge.org/evaluation/thoraxcbct/leaderboard/) · CBCT–CT | 🥇 **IMPACT-Seg** | **0.762** | **9.10** |
+| | 2nd entry | 0.732 | 26.26 |
+| | 3rd entry | 0.732 | 11.25 |
+
+Both entries rank first, with the lowest HD95 of all submissions (tied on AbdomenMRCT); compared with our previous intensity-based
+submissions (IMPACT features in Elastix), the Dice increased by 0.04 and 0.11.
 
 ## Training
 
-The five splits used for the released folds are in [`splits/`](splits). The dataset is on Hugging Face; [`tools/prepare_hub_dataset.py`](tools/prepare_hub_dataset.py) lays a download out in the training layout and maps the split case IDs to the Hub cases ([`splits/hub_crosswalk.csv`](splits/hub_crosswalk.csv)).
+The five splits of the released folds are in [`splits/`](splits). [`tools/prepare_hub_dataset.py`](tools/prepare_hub_dataset.py)
+turns a download of the Hugging Face dataset into the training layout, using [`splits/hub_crosswalk.csv`](splits/hub_crosswalk.csv)
+to map the split case IDs to the Hub folders.
 
 ```bash
 pip install -r requirements.lock --extra-index-url https://download.pytorch.org/whl/cu126   # or scripts/bootstrap_pyenv.sh
-python tools/prepare_hub_dataset.py --hub-root hub --output-root data          # raw layout + Hub-restricted splits
+python -c "from huggingface_hub import snapshot_download; snapshot_download('HCedric/IMPACTSeg', repo_type='dataset', local_dir='hub', allow_patterns=['CT/**', 'CBCT/**', 'MRI/**'])"
+python tools/prepare_hub_dataset.py --hub-root hub --output-root data          # training layout + Hub splits
 mkdir -p data/preprocessed
 python tools/preprocess_training_dataset.py --source-root data/raw --destination-root data/preprocessed \
     --splits-root data/splits --overwrite                                       # z-score + 1.5 x 1.5 x 2 mm, once
@@ -50,19 +111,26 @@ python tools/run_training.py --config configs/train_3d.yml --dataset-root data/p
     --splits-root data/splits --split-name fold1 --run-root runs/fold1_3d --max-iterations 2000000 --gpu 0
 ```
 
-Recipe: SGD (lr 0.01, Nesterov momentum 0.99), polynomial decay over 2 M updates, cross-entropy + Dice with deep supervision, 70 % foreground-centred patches. The five folds are modality-balanced: a test case of one fold can be a training case of another, so evaluate internal cases with the fold whose test partition contains them.
+Recipe: SGD (lr 0.01, Nesterov momentum 0.99), polynomial decay over 2 M iterations, cross-entropy + Dice with deep
+supervision, 70 % foreground-centred patches, validation every 100 k iterations. The folds are modality-balanced: a
+test case of one fold can be a training case of another, so evaluate internal cases with the fold whose test
+partition contains them.
 
 ## Repository
 
 ```text
-impactseg_v2/      network, losses, sampling, augmentations and KonfAI output classes
-configs/           training recipes (train_2p5d.yml, train_3d.yml), inference configs (predict_*.yml), labels.json
-splits/            five explicit train / validation / test splits, crosswalk to the Hugging Face cases
-tools/             dataset preparation, preprocessing, split validation, training launcher
+impactseg_v2/   network, losses, sampling, augmentations and KonfAI output classes
+configs/        train_2p5d.yml, train_3d.yml, predict_2p5d.yml, predict_3d.yml, labels.json
+splits/         five train / validation / test splits, crosswalk to the Hugging Face cases
+tools/          dataset preparation, preprocessing, split validation, training launcher
 ```
 
-## Data, licenses and citation
+## Data, license and citation
 
-The code is released under the [Apache License 2.0](LICENSE). The training data combine public datasets with their own licenses, some of them non-commercial; see the [dataset card](https://huggingface.co/datasets/HCedric/IMPACTSeg). The reference masks were produced by automatic labelling and completion, followed by manual review and correction: they are not exhaustive manual ground truth.
+The code is released under the [Apache License 2.0](LICENSE). The dataset combines public datasets with their own
+licenses, several of them non-commercial: see the [dataset card](https://huggingface.co/datasets/HCedric/IMPACTSeg).
+Its reference masks come from automatic labelling, completion and manual review and correction; they are curated
+references, not exhaustive manual delineations. Research use only, not a clinically validated device.
 
-A citation will be added with the manuscript; until then, see [CITATION.cff](CITATION.cff).
+The manuscript is in preparation (C. Hémon, V. Boussot, C. Kurz, G. Landry); until then, please cite this
+repository ([CITATION.cff](CITATION.cff)).

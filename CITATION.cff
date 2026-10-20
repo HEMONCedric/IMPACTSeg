@@ -2,6 +2,8 @@ cff-version: 1.2.0
 message: "Provisional software attribution. The manuscript is in preparation; verify the final authors and citation before publication."
 type: software
 license: Apache-2.0
+repository-code: "https://github.com/HEMONCedric/IMPACTSeg"
+url: "https://huggingface.co/datasets/HCedric/IMPACTSeg"
 title: "IMPACT-Seg: anatomical segmentation across CT, CBCT and MRI"
 authors:
   - family-names: Hémon
