@@ -1,0 +1,8 @@
+# Runtime for the IMPACTSeg fine 2.5D KonfAI v2 training.
+# PyTorch uses the cu126 index selected by bootstrap_pyenv.sh.
+torch==2.14.0+cu126
+konfai[itk,monitoring,omezarr,tensorboard]==1.8.3
+numpy==2.4.3
+scipy==1.17.1
+nibabel==5.4.2
+pytest==9.0.2

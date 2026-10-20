@@ -1,0 +1,13 @@
+IMPACTSeg / IMPACT-Seg
+Copyright 2026 IMPACTSeg contributors.
+Project code is distributed under the Apache License, Version 2.0.
+
+Scientific attribution (draft manuscript): Cédric Hémon, Valentin Boussot,
+Christopher Kurz and Guillaume Landry.
+
+IMPACTSeg uses KonfAI (https://github.com/fideus-labs/KonfAI), PyTorch,
+nnU-Net-style residual encoder architectures, SimpleITK and other separately
+licensed dependencies. Dependency copyrights and licenses remain their own.
+
+This NOTICE is informational and does not replace the original dataset terms
+or authorize redistribution of third-party data or model binaries.

@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "Provisional software attribution. The manuscript is in preparation; verify the final authors and citation before publication."
+type: software
+license: Apache-2.0
+title: "IMPACT-Seg: anatomical segmentation across CT, CBCT and MRI"
+authors:
+  - family-names: Hémon
+    given-names: Cédric
+  - family-names: Boussot
+    given-names: Valentin
+  - family-names: Kurz
+    given-names: Christopher
+  - family-names: Landry
+    given-names: Guillaume
+abstract: "A multi-modality anatomical segmentation workflow with 2.5D and 3D residual encoder networks, shared label definitions and reproducible KonfAI recipes."
+keywords:
+  - medical image segmentation
+  - CT
+  - CBCT
+  - MRI

@@ -1,0 +1,29 @@
+{
+  "schema": "impactseg-v2-explicit-splits/v1",
+  "fold": 4,
+  "source": {
+    "train": "Code/training/splits/ct_cbct_mri_fold4_train_raw.txt",
+    "validation": "Code/training/splits/ct_cbct_mri_fold4_val.txt",
+    "test": "Code/training/splits/ct_cbct_mri_fold4_test.txt"
+  },
+  "counts": {
+    "train": 1875,
+    "validation": 300,
+    "test": 168
+  },
+  "sha256": {
+    "train": "38c887848ac4271d9f138dc35576611340972202dffede6702997d623a2c8de6",
+    "validation": "d5ec4d93dc8380d4e2026075a980cdaf80459cc862e90c7ab4866d0001143093",
+    "test": "172cd2835a0c084d9f438afbd329b95837744428648dd4ac67c1c969d9e76948",
+    "fit": "a72b9246332f3798fb76a70eda18db0198ea32f94cd78869bf9102da255061da"
+  },
+  "fit_count": 2175,
+  "fit_definition": "ordered union of explicit train and validation; KonfAI removes validation from this population",
+  "excluded_case_prefixes": [],
+  "excluded_cases": {
+    "train": [],
+    "validation": [],
+    "test": []
+  },
+  "guarantee": "train, validation and test are pairwise disjoint by case ID"
+}

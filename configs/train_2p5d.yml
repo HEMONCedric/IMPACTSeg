@@ -1,0 +1,211 @@
+# IMPACT-Seg 2.5D training recipe (five-slice context, 288 x 288 patches).
+# This variant reads images already standardized and image/mask pairs already
+# resampled to [1.5, 1.5, 2.0] mm by tools/preprocess_training_dataset.py.
+# All path tokens are resolved by tools/resolve_config.py; do not edit the resolved copy.
+Trainer:
+  train_name: IMPACTSeg_multimodal_resencm_2p5D_fold5_sgd_poly_v2
+  manual_seed: 42
+  epochs: 200
+  autocast: true
+  # Scheduler is iteration-based: one LR update after every optimizer step.
+  it_lr_update: 1
+  it_validation: 100000
+  ema_decay: 0.0
+  save_checkpoint_mode: BEST
+  data_log: [image/IMAGE/3, mask_fine/IMAGE/3, Argmax/IMAGE/3]
+  EarlyStopping: None
+  gradient_checkpoints: None
+  gpu_checkpoints: None
+
+  Model:
+    classpath: impactseg_v2.models:ImpactSegResidualEncoderUNet
+    ImpactSegResidualEncoderUNet:
+      dim: 2
+      in_channels: 5
+      num_classes: ${IMPACTSEG_FINE_NETWORK_OUTPUTS}
+      n_stages: 6
+      features_per_stage: [32, 64, 128, 256, 320, 512]
+      strides: [1, 2, 2, 2, 2, 2]
+      kernel_sizes: 3
+      n_blocks_per_stage: [1, 3, 4, 6, 6, 6]
+      n_conv_per_stage_decoder: [1, 1, 1, 1, 1]
+      conv_bias: true
+      negative_slope: 0.01
+      # Matches historical batchnorm + affine + running statistics.
+      norm_mode: BATCH
+      deep_supervision_outputs: 3
+      # nnU-Net optimisation defaults. Unlike the AdamW configuration, this
+      # starts directly at 1e-2 without warmup.
+      optimizer:
+        name: SGD
+        lr: 1.0e-02
+        momentum: 0.99
+        dampening: 0.0
+        weight_decay: 3.0e-05
+        nesterov: true
+        maximize: false
+      schedulers:
+        # Native KonfAI implementation of nnU-Net polynomial decay:
+        # lr(step) = 1e-2 * (1 - step / 2e6)^0.9.
+        PolyLRScheduler:
+          initial_lr: 1.0e-02
+          max_steps: 2000000
+          exponent: 0.9
+          current_step: null
+          nb_step: 0
+      outputs_criterions:
+        Logits_4:
+          targets_criterions:
+            mask_fine:
+              criterions_loader:
+                impactseg_v2_losses:SegCrossEntropy:
+                  is_loss: true
+                  group: 0
+                  start: 0
+                  stop: None
+                  accumulation: false
+                  schedulers:
+                    Constant: {nb_step: 0}
+                  background_weight: 0.2
+                  label_smoothing: 0.02
+        Softmax_4:
+          targets_criterions:
+            mask_fine:
+              criterions_loader:
+                impactseg_v2_losses:DiceNoBackground:
+                  is_loss: true
+                  group: 0
+                  start: 0
+                  stop: None
+                  accumulation: false
+                  schedulers:
+                    Constant: {nb_step: 0}
+                  smooth: 1.0e-06
+                  only_present: true
+                impactseg_v2_losses:DiceNoBackgroundAbsentAware:
+                  is_loss: true
+                  group: 0
+                  start: 0
+                  stop: None
+                  accumulation: false
+                  schedulers:
+                    Constant: {nb_step: 0}
+                  smooth: 1.0e-06
+                  coefficient: 0.20
+                impactseg_v2_losses:DiceNoBackgroundMetric:
+                  is_loss: false
+                  group: 0
+                  start: 0
+                  stop: None
+                  accumulation: false
+                  schedulers:
+                    Constant: {nb_step: 0}
+                  smooth: 1.0e-06
+                  only_present: true
+        Softmax_3:
+          targets_criterions:
+            mask_fine:
+              criterions_loader:
+                impactseg_v2_losses:DiceNoBackground:
+                  is_loss: true
+                  group: 0
+                  start: 0
+                  stop: None
+                  accumulation: false
+                  schedulers:
+                    Constant: {nb_step: 0}
+                  smooth: 1.0e-06
+                  only_present: true
+                  coefficient: 0.20
+        Softmax_2:
+          targets_criterions:
+            mask_fine:
+              criterions_loader:
+                impactseg_v2_losses:DiceNoBackground:
+                  is_loss: true
+                  group: 0
+                  start: 0
+                  stop: None
+                  accumulation: false
+                  schedulers:
+                    Constant: {nb_step: 0}
+                  smooth: 1.0e-06
+                  only_present: true
+                  coefficient: 0.10
+
+  Dataset:
+    # KonfAI 1.8 source syntax: root:append:format.
+    dataset_filenames:
+      - ${IMPACTSEG_DATASET_ROOT}/CT:a:nii
+      - ${IMPACTSEG_DATASET_ROOT}/CBCT:a:nii
+      - ${IMPACTSEG_DATASET_ROOT}/MRI:a:nii
+      - ${IMPACTSEG_DATASET_ROOT}/SynthRADSegMRI:a:nii
+      - ${IMPACTSEG_DATASET_ROOT}/SynthRADSegCBCT:a:nii
+    groups_src:
+      image:
+        groups_dest:
+          image:
+            is_input: true
+            transforms:
+              TensorCast: {dtype: float32, inverse: false}
+            patch_transforms: None
+      mask_fine:
+        groups_dest:
+          mask_fine:
+            is_input: false
+            transforms:
+              TensorCast: {dtype: uint8, inverse: false}
+            patch_transforms: None
+    augmentations:
+      DataAugmentation_0:
+        nb: 1
+        data_augmentations:
+          Brightness:
+            prob: 0.15
+            b_std: 0.10
+            groups: [image]
+          impactseg_v2.augmentations:SimulateLowResolution:
+            prob: 0.15
+            factor_min: 1.0
+            factor_max: 2.0
+            groups: [image]
+          impactseg_v2.augmentations:GaussianNoise:
+            prob: 0.15
+            std_min: 0.0
+            std_max: 0.04
+            groups: [image]
+          impactseg_v2.augmentations:GaussianBlur:
+            prob: 0.15
+            sigma_min: 0.5
+            sigma_max: 0.8
+            in_plane_only: true
+            groups: [image]
+          Contrast:
+            prob: 0.15
+            c_std: 0.17
+            groups: [image]
+    inline_augmentations: true
+    # Old wrapper disabled validation augmentations after construction.
+    validation_augmentations: false
+    subset: ${IMPACTSEG_SPLITS_ROOT}/fold1/train.txt
+    validation: ${IMPACTSEG_SPLITS_ROOT}/fold1/validation.txt
+    shuffle: true
+    # 70% foreground-oriented draws; 30% uniform over all patches.
+    foreground_sampling:
+      enabled: true
+      foreground_probability: 0.70
+      mask_group: mask_fine
+    # Explicitly select KonfAI native streaming; no patient-bank loader.
+    banked_streaming:
+      enabled: false
+    batch_size: 16
+    memory_budget: 96 GiB
+    num_workers: 8
+    pin_memory: true
+    prefetch_factor: 2
+    persistent_workers: true
+    Patch:
+      patch_size: [1, 288, 288]
+      overlap: None
+      pad_value: -2
+      extend_slice: 4
