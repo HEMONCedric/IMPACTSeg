@@ -76,3 +76,9 @@ FINE_FOREGROUND_COUNT = foreground_count(FINE_LABELS)
 FINE_NETWORK_OUTPUTS = FINE_FOREGROUND_COUNT + 1
 MAP_559_FOREGROUND_COUNT = foreground_count(MAP_559_LABELS)
 MAP_559_NETWORK_OUTPUTS = MAP_559_FOREGROUND_COUNT + 1
+
+# Structures of mask_fine that the released fine networks never output: a few tens of voxels at the training
+# resolution, they were not learned (softmax ~0.001 inside the reference). The inference outputs suppress them and the
+# evaluation excludes them, so the models provide FINE_FOREGROUND_COUNT - 5 = 126 structures (IDs unchanged).
+NOT_PREDICTED_FINE_LABELS = ("cochlea_left", "cochlea_right", "optic_chiasm", "optic_nerve_left", "optic_nerve_right")
+NOT_PREDICTED_FINE_IDS = tuple(i for i, name in FINE_LABELS.items() if name in NOT_PREDICTED_FINE_LABELS)

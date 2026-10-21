@@ -17,6 +17,8 @@ import torch
 from konfai.data.patching import Accumulator
 from konfai.predictor import OutputDataset
 
+from .labels import FINE_NETWORK_OUTPUTS, NOT_PREDICTED_FINE_IDS
+
 
 def __getattr__(name: str) -> Any:
     """Replay old run-local YAMLs without keeping trim in the production code."""
@@ -161,6 +163,9 @@ class ProbabilityConfidenceSelectOutputDataset(ConfidenceSelectOutputDataset):
         attribute: Any = None,
         number_of_channels_per_model: list[int] | None = None,
     ) -> Any:
+        if layer.shape[0] == FINE_NETWORK_OUTPUTS:  # fine map: classes not provided by the released models
+            layer = layer.clone()
+            layer[list(NOT_PREDICTED_FINE_IDS)] = 0
         confidence, labels = torch.max(layer, dim=0, keepdim=True)
         packed = torch.cat(
             (

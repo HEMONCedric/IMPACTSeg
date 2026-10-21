@@ -10,7 +10,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from impactseg_v2.labels import CONVENTION_ID, FINE_LABELS, MAP_559_LABELS  # noqa: E402
+from impactseg_v2.labels import CONVENTION_ID, FINE_LABELS, MAP_559_LABELS, NOT_PREDICTED_FINE_IDS  # noqa: E402
 
 
 def main() -> None:
@@ -22,7 +22,9 @@ def main() -> None:
              "authoritative_source": "impactseg_v2/labels.py",
              "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
              "fine_map": {"foreground_classes": len(FINE_LABELS) - 1,
-                          "network_outputs_including_background": len(FINE_LABELS), "labels": FINE_LABELS},
+                          "network_outputs_including_background": len(FINE_LABELS), "labels": FINE_LABELS,
+                          "not_output_by_the_models": {i: FINE_LABELS[i] for i in NOT_PREDICTED_FINE_IDS},
+                          "structures_output_by_the_models": len(FINE_LABELS) - 1 - len(NOT_PREDICTED_FINE_IDS)},
              "coarse_map": {"foreground_classes": len(MAP_559_LABELS) - 1,
                             "network_outputs_including_background": len(MAP_559_LABELS),
                             "hub_filename": "mask_coarse.nii.gz", "labels": MAP_559_LABELS},

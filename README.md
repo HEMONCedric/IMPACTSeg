@@ -14,19 +14,19 @@ Dense whole-body anatomy in seconds, built for radiotherapy imaging.</p>
 
 <table>
 <tr>
-<td width="38%" align="center"><img src="assets/anatomy_3d.png" alt="131 structures segmented on a whole-body CT"></td>
+<td width="38%" align="center"><img src="assets/anatomy_3d.png" alt="126 structures segmented on a whole-body CT"></td>
 <td>
 
-IMPACT-Seg segments **131 anatomical structures** with the same network on **planning CT, cone-beam CT and MRI**:
+IMPACT-Seg segments **126 anatomical structures** with the same network on **planning CT, cone-beam CT and MRI**:
 abdominal and thoracic organs, the five lung lobes, heart chambers and great vessels, **every vertebra and rib by
 level**, pelvic and limb bones, trunk muscles, and head-and-neck organs at risk.
 
-- **One model for three modalities.** No modality flag, no per-modality fine-tuning, the same 131 labels everywhere.
+- **One model for three modalities.** No modality flag, no per-modality fine-tuning, the same 126 structures everywhere.
 - **Robust on CBCT.** From CT to the paired CBCT, the Dice drops by about **0.02**, against **0.15–0.18** for CT-only
   whole-body tools; on real CBCT it reaches **0.84**, where the best competitor reaches 0.67.
 - **Consistent across modalities.** The same patient gets the same anatomy on CT, CBCT and MRI, which is what
   adaptive radiotherapy needs.
-- **Fast.** A whole-body CT in about 8 s on one GPU with less than 6 GB of memory, all 131 structures at once: 10 to 70 times faster than the compared whole-body tools.
+- **Fast.** A whole-body CT in about 8 s on one GPU with less than 6 GB of memory, all 126 structures at once: 10 to 70 times faster than the compared whole-body tools.
 - **A representation, not only a segmentation.** Used as the similarity of a registration, it ranks **first on both
   multimodal Learn2Reg tasks** (MRI–CT and CBCT–CT, [below](#registration-learn2reg)).
 - **Open.** Data, weights and code: two networks (2.5D and 3D) × five folds, run with a plain `konfai PREDICTION`.
@@ -70,7 +70,9 @@ inference with confidence-based patch fusion, and return to the native grid.
 | **IMPACT-Seg 2.5D** | 5 adjacent axial slices | 288 × 288 | BatchNorm | 411 MB | ≈ 8 s · 5.7 GB |
 | **IMPACT-Seg 3D** | volume | 128 × 128 × 128 | InstanceNorm | 1.2 GB | ≈ 15 s · 4.4 GB |
 
-Both are six-stage residual-encoder U-Nets with 132 outputs (background + 131 structures), trained for 2 M
+Both are six-stage residual-encoder U-Nets with 132 outputs (background + the 131 labels of the dataset; the cochleae,
+optic chiasm and optic nerves, a few tens of voxels at the training resolution, were not learned and are never output,
+so the models provide 126 structures), trained for 2 M
 iterations on the IMPACT-Seg dataset (CT, real and simulated CBCT, MRI), as five folds on different patient splits. The 3D network is
 the more accurate of the two; the 2.5D network is lighter. Any single fold is a complete model; the five-fold
 ensemble is the most accurate option on new data.

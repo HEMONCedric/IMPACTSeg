@@ -16,6 +16,8 @@ from konfai.data.patching import ModelPatch
 from konfai.network import blocks, network
 from konfai.utils.config import config
 
+from .labels import FINE_NETWORK_OUTPUTS, NOT_PREDICTED_FINE_IDS
+
 
 def _validate_topology(name: str, dim: int, n_stages: int, features: list[int], strides: list[int | list[int]]) -> None:
     """Local validation: avoid importing KonfAI's private nnU-Net helper module."""
@@ -75,6 +77,9 @@ class _ArgmaxConfidence(torch.nn.Module):
     """Pack argmax labels and 8-bit confidence into two channels."""
 
     def forward(self, probabilities: torch.Tensor) -> torch.Tensor:
+        if probabilities.shape[1] == FINE_NETWORK_OUTPUTS:  # fine map: classes not provided by the released models
+            probabilities = probabilities.clone()
+            probabilities[:, list(NOT_PREDICTED_FINE_IDS)] = 0
         confidence, labels = torch.max(probabilities, dim=1, keepdim=True)
         labels = labels.to(torch.uint8)
         confidence_u8 = torch.round(confidence * 255.0).to(torch.uint8)
