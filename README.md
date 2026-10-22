@@ -56,6 +56,9 @@ konfai PREDICTION --config configs/predict_3d.yml --models hub/models/3D/fold1/f
 
 #    or the five-fold ensemble, recommended on new data:
 konfai PREDICTION --config configs/predict_3d.yml --models hub/models/3D/fold{1,2,3,4,5}/fold*.pt --gpu 0
+
+#    coarse body regions and tissues (download models/coarse/** instead)
+konfai PREDICTION --config configs/predict_coarse.yml --models hub/models/coarse/coarse.pt --gpu 0
 ```
 
 You get `Predictions/IMPACTSeg_3D/Segmentations/<case>/mask_fine.nii.gz`, a label map on the grid of your image;
@@ -69,6 +72,7 @@ inference with confidence-based patch fusion, and return to the native grid.
 |---|---|---|---|---:|---|
 | **IMPACT-Seg 2.5D** | 5 adjacent axial slices | 288 × 288 | BatchNorm | 411 MB | ≈ 8 s · 5.7 GB |
 | **IMPACT-Seg 3D** | volume | 128 × 128 × 128 | InstanceNorm | 1.2 GB | ≈ 15 s · 4.4 GB |
+| **Coarse 3D** | volume at 3 mm | 128 × 128 × 128 | InstanceNorm | 57 MB | < 10 s · < 1 GB (RTX 8000) |
 
 Both are six-stage residual-encoder U-Nets with 132 outputs (background + the 131 labels of the dataset; the cochleae,
 optic chiasm and optic nerves, a few tens of voxels at the training resolution, were not learned and are never output,
@@ -76,6 +80,11 @@ so the models provide 126 structures), trained for 2 M
 iterations on the IMPACT-Seg dataset (CT, real and simulated CBCT, MRI), as five folds on different patient splits. The 3D network is
 the more accurate of the two; the 2.5D network is lighter. Any single fold is a complete model; the five-fold
 ensemble is the most accurate option on new data.
+
+The **coarse** network is a separate, light model (7 M parameters) for the 11 body-region and tissue classes of
+`mask_coarse` (subcutaneous tissue, muscle, abdominal and thoracic cavities, bones, glands, pericardium, breast implant,
+mediastinum, spinal cord, brain), trained on one split; on its 64 test volumes the Dice is 0.89 on CT, 0.86 on CBCT and
+0.81 on MRI (indicative, partly pseudo-labelled references). It writes `Predictions/IMPACTSeg_coarse/Segmentations/<case>/mask_coarse.nii.gz`.
 
 ## Registration (Learn2Reg)
 
@@ -122,7 +131,7 @@ partition contains them.
 
 ```text
 impactseg_v2/   network, losses, sampling, augmentations and KonfAI output classes
-configs/        train_2p5d.yml, train_3d.yml, predict_2p5d.yml, predict_3d.yml, labels.json
+configs/        train_2p5d.yml, train_3d.yml, predict_2p5d.yml, predict_3d.yml, predict_coarse.yml, labels.json
 splits/         five train / validation / test splits, crosswalk to the Hugging Face cases
 tools/          dataset preparation, preprocessing, split validation, training launcher
 ```
