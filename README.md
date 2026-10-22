@@ -6,7 +6,8 @@
 Dense whole-body anatomy in seconds, built for radiotherapy imaging.</p>
 
 <p align="center">
-  <a href="https://huggingface.co/datasets/HCedric/IMPACTSeg"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20dataset%20%26%20models-HCedric%2FIMPACTSeg-ffcc4d" alt="Hugging Face"></a>
+  <a href="https://huggingface.co/HCedric/IMPACTSeg"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20models-HCedric%2FIMPACTSeg-ffcc4d" alt="Hugging Face models"></a>
+  <a href="https://huggingface.co/datasets/HCedric/IMPACTSeg"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20dataset-HCedric%2FIMPACTSeg-ffcc4d" alt="Hugging Face dataset"></a>
   <a href="https://github.com/fideus-labs/KonfAI"><img src="https://img.shields.io/badge/built%20with-KonfAI-3b82f6" alt="KonfAI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/code-Apache--2.0-22c55e" alt="Apache-2.0"></a>
   <img src="https://img.shields.io/badge/paper-in%20preparation-9ca3af" alt="Paper in preparation">
@@ -47,18 +48,18 @@ and a whole-body MRI from an external dataset (five-fold ensemble).</sub></p>
 # 1. KonfAI with NIfTI support (reference: Python 3.11, KonfAI 1.8.3, PyTorch 2.14)
 pip install "konfai[itk]==1.8.3" huggingface_hub
 
-# 2. Weights from Hugging Face (3D network; use models/2_5D/** for the 2.5D one)
-python -c "from huggingface_hub import snapshot_download; snapshot_download('HCedric/IMPACTSeg', repo_type='dataset', local_dir='hub', allow_patterns=['models/*', 'models/3D/**'])"
+# 2. Weights from Hugging Face (3D network; use 2_5D/** for the 2.5D one)
+python -c "from huggingface_hub import snapshot_download; snapshot_download('HCedric/IMPACTSeg', local_dir='hub', allow_patterns=['3D/**'])"
 
 # 3. Your volumes (CT, CBCT or MRI, any orientation): Dataset/<case>/image.nii.gz
 # 4. From the root of this repository:
-konfai PREDICTION --config configs/predict_3d.yml --models hub/models/3D/fold1/fold1.pt --gpu 0
+konfai PREDICTION --config configs/predict_3d.yml --models hub/3D/fold1/fold1.pt --gpu 0
 
 #    or the five-fold ensemble, recommended on new data:
-konfai PREDICTION --config configs/predict_3d.yml --models hub/models/3D/fold{1,2,3,4,5}/fold*.pt --gpu 0
+konfai PREDICTION --config configs/predict_3d.yml --models hub/3D/fold{1,2,3,4,5}/fold*.pt --gpu 0
 
-#    coarse body regions and tissues (download models/coarse/** instead)
-konfai PREDICTION --config configs/predict_coarse.yml --models hub/models/coarse/coarse.pt --gpu 0
+#    coarse body regions and tissues (download coarse/** instead)
+konfai PREDICTION --config configs/predict_coarse.yml --models hub/coarse/coarse.pt --gpu 0
 ```
 
 You get `Predictions/IMPACTSeg_3D/Segmentations/<case>/mask_fine.nii.gz`, a label map on the grid of your image;

@@ -3,7 +3,14 @@ message: "Provisional software attribution. The manuscript is in preparation; ve
 type: software
 license: Apache-2.0
 repository-code: "https://github.com/HEMONCedric/IMPACTSeg"
-url: "https://huggingface.co/datasets/HCedric/IMPACTSeg"
+url: "https://huggingface.co/HCedric/IMPACTSeg"
+identifiers:
+  - type: url
+    value: "https://huggingface.co/HCedric/IMPACTSeg"
+    description: "Pretrained models"
+  - type: url
+    value: "https://huggingface.co/datasets/HCedric/IMPACTSeg"
+    description: "Dataset"
 title: "IMPACT-Seg: anatomical segmentation across CT, CBCT and MRI"
 authors:
   - family-names: Hémon
