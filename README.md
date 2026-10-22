@@ -72,7 +72,7 @@ inference with confidence-based patch fusion, and return to the native grid.
 |---|---|---|---|---:|---|
 | **IMPACT-Seg 2.5D** | 5 adjacent axial slices | 288 × 288 | BatchNorm | 411 MB | ≈ 8 s · 5.7 GB |
 | **IMPACT-Seg 3D** | volume | 128 × 128 × 128 | InstanceNorm | 1.2 GB | ≈ 15 s · 4.4 GB |
-| **Coarse 3D** | volume at 3 mm | 128 × 128 × 128 | InstanceNorm | 57 MB | < 3 s · < 1 GB (RTX 8000) |
+| **Coarse 3D** | volume at 3 mm | 128 × 128 × 128 | InstanceNorm | 57 MB | < 3 s · < 1 GB |
 
 Both are six-stage residual-encoder U-Nets with 132 outputs (background + the 131 labels of the dataset; the cochleae,
 optic chiasm and optic nerves, a few tens of voxels at the training resolution, were not learned and are never output,
