@@ -23,13 +23,14 @@ abdominal and thoracic organs, the five lung lobes, heart chambers and great ves
 level**, pelvic and limb bones, trunk muscles, and head-and-neck organs at risk.
 
 - **One model for three modalities.** No modality flag, no per-modality fine-tuning, the same 126 structures everywhere.
-- **Robust on CBCT.** From CT to the paired CBCT, the Dice drops by about **0.02**, against **0.15–0.18** for CT-only
-  whole-body tools; on real CBCT it reaches **0.84**, where the best competitor reaches 0.67.
+- **Robust on CBCT.** On real CBCT the Dice reaches **0.84**, where the best compared method reaches 0.67, and
+  **0.58** on independent clinical pancreatic CBCT (0.49 for TotalSegmentator); the predictions on the planning CT and
+  on the registered real CBCT of the same patient agree at **0.88** Dice, against 0.49–0.69 for the compared methods.
 - **Consistent across modalities.** The same patient gets the same anatomy on CT, CBCT and MRI, which is what
   adaptive radiotherapy needs.
-- **Fast.** A whole-body CT in about 8 s on one GPU with less than 6 GB of memory, all 126 structures at once: 10 to 70 times faster than the compared whole-body tools.
-- **A representation, not only a segmentation.** Used as the similarity of a registration, it ranks **first on both
-  multimodal Learn2Reg tasks** (MRI–CT and CBCT–CT, [below](#registration-learn2reg)).
+- **Fast.** A whole-body CT in 8.0 s (2.5D) or 14.8 s (3D) on one GPU with less than 6 GB of memory, all 126 structures at once: 10 to 70 times faster than the compared whole-body tools.
+- **A representation, not only a segmentation.** Used as the similarity of a registration, its last-decoder features
+  rank **first on both multimodal Learn2Reg tasks** (MRI–CT and CBCT–CT, [below](#registration-learn2reg)).
 - **Open.** Data, weights and code: two networks (2.5D and 3D) × five folds, run with a plain `konfai PREDICTION`.
 
 <sub>Left: 3D network on a held-out whole-body CT (anterior and oblique views; lungs and large muscles translucent).</sub>
@@ -41,6 +42,10 @@ level**, pelvic and limb bones, trunk muscles, and head-and-neck organs at risk.
 <p align="center"><img src="assets/multimodal.png" alt="IMPACT-Seg 3D on CT, simulated and real CBCT, and external whole-body MRI" width="100%"></p>
 <p align="center"><sub>Out-of-fold predictions of the 3D network: whole-body CT, CBCT simulated from a whole-body CT, real thoracic CBCT,
 and a whole-body MRI from an external dataset (five-fold ensemble).</sub></p>
+
+<p align="center"><a href="https://huggingface.co/HCedric/IMPACTSeg/resolve/main/impactseg.mp4"><img src="assets/video_poster.jpg" alt="IMPACT-Seg video (55 s)" width="80%"></a></p>
+<p align="center"><sub>▶ IMPACT-Seg in 55 s (click to play): one model on CT, CBCT and MRI, 126 structures, and its features used
+for multimodal registration. Images: MTBD / Multimodal-HC (Hinge et al., <i>Scientific Data</i> 2026, CC BY 4.0) and Learn2Reg AbdomenMRCT.</sub></p>
 
 ## Quick start
 
@@ -71,8 +76,8 @@ inference with confidence-based patch fusion, and return to the native grid.
 
 | | Input | Patch | Normalization | Checkpoint | Whole-body CT (RTX A6000, per volume) |
 |---|---|---|---|---:|---|
-| **IMPACT-Seg 2.5D** | 5 adjacent axial slices | 288 × 288 | BatchNorm | 411 MB | ≈ 8 s · 5.7 GB |
-| **IMPACT-Seg 3D** | volume | 128 × 128 × 128 | InstanceNorm | 1.2 GB | ≈ 15 s · 4.4 GB |
+| **IMPACT-Seg 2.5D** | 5 adjacent axial slices | 288 × 288 | BatchNorm | 411 MB | 8.0 s · 5.7 GB |
+| **IMPACT-Seg 3D** | volume | 128 × 128 × 128 | InstanceNorm | 1.2 GB | 14.8 s · 4.4 GB |
 | **Coarse 3D** | volume at 3 mm | 128 × 128 × 128 | InstanceNorm | 57 MB | < 3 s · < 1 GB |
 
 Both are six-stage residual-encoder U-Nets with 132 outputs (background + the 131 labels of the dataset; the cochleae,
@@ -89,10 +94,18 @@ mediastinum, spinal cord, brain), trained on one split; on its 64 test volumes t
 
 ## Registration (Learn2Reg)
 
-Because IMPACT-Seg gives the same dense anatomy on every modality, its predictions can serve as the similarity of a
-multimodal registration: the IMPACT-Seg 3D segmentations of the two images drive an instance optimisation
-(ConvexAdam or Elastix initialisation, then Adam refinement of a soft Dice between the predicted structures). On the official
-Learn2Reg test leaderboards:
+Because IMPACT-Seg represents the same anatomy on every modality, the features of the last decoder layer of the 3D
+network can serve as the similarity of a multimodal registration:
+
+- **AbdomenMRCT (MRI–CT)**: ConvexAdam initialised from the predicted liver, spleen and kidneys, then Adam
+  refinement of the L1 distance between the last-decoder features of the fixed and warped moving images, with
+  diffusion regularisation (160 iterations, then 180 on a control grid of two-voxel spacing); the segmentations are
+  used for the initialisation only.
+- **ThoraxCBCT (CBCT–CT)**: our previous Elastix-IMPACT pipeline for the initialisation, then refinement combining the
+  last-decoder feature similarity, MIND-SSC descriptors and diffusion regularisation (60 iterations at about 4 mm,
+  100 at 2 mm).
+
+On the official Learn2Reg test leaderboards:
 
 | Task | Entry | Dice ↑ | HD95 (mm) ↓ |
 |---|---|---:|---:|
@@ -144,5 +157,5 @@ licenses, several of them non-commercial: see the [dataset card](https://hugging
 Its reference masks come from automatic labelling, completion and manual review and correction; they are curated
 references, not exhaustive manual delineations. Research use only, not a clinically validated device.
 
-The manuscript is in preparation (C. Hémon, V. Boussot, C. Kurz, G. Landry); until then, please cite this
+The manuscript is in preparation (C. Hémon, V. Boussot, M. McCormick, L. Zimmermann, C. Kurz, G. Landry); until then, please cite this
 repository ([CITATION.cff](CITATION.cff)).
