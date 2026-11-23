@@ -72,6 +72,23 @@ names are in [`configs/labels.json`](configs/labels.json). Everything happens in
 reorientation, z-score normalization (no HU window, any modality), resampling to 1.5 × 1.5 × 2 mm, sliding-window
 inference with confidence-based patch fusion, and return to the native grid.
 
+## Run it as a KonfAI app
+
+The three models are also packaged as [KonfAI apps](https://huggingface.co/VBoussot/ImpactSeg): no configuration
+to write, and the weights download on first use. They need KonfAI 1.9.0 or later.
+
+```bash
+pip install impact_seg_konfai
+impact-seg-konfai segment fine-3d -i image.nii.gz -o output/ --gpu 0     # or fine-2.5d, coarse
+```
+
+- `--ensemble 1` runs one fold instead of five: five times faster, and one checkpoint to download.
+- The same apps with the generic runner: `konfai-apps infer VBoussot/ImpactSeg:fine-3d -i image.nii.gz -o output/`.
+- In 3D Slicer: the [IMPACT-Seg extension](https://github.com/vboussot/SlicerImpactSeg).
+
+The apps give the labels of the release's own `konfai PREDICTION`: the same voxels on a CT or CBCT in HU with the 3D
+networks, and at most 0.02 % of the foreground voxels apart on a float volume.
+
 ## Models
 
 | | Input | Patch | Normalization | Checkpoint | Whole-body CT (RTX A6000, per volume) |
