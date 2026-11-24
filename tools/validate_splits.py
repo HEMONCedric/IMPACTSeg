@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail fast when explicit IMPACTSeg v2 split files overlap."""
+"""Fail fast when explicit IMPACTSeg split files overlap."""
 from __future__ import annotations
 
 import argparse

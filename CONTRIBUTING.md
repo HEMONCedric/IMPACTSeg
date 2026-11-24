@@ -4,7 +4,7 @@ This is a research repository. Discuss scientific changes before changing label 
 patch geometry, splits or metrics. Do not commit medical images, checkpoints, credentials or cluster-specific
 configuration.
 
-`impactseg_v2/labels.py` is the only source of the label definitions; regenerate `configs/labels.json` with
+`impactseg/labels.py` is the only source of the label definitions; regenerate `configs/labels.json` with
 `python scripts/export_labels.py` instead of editing it. Run
 `python tools/validate_splits.py --split-dir splits/fold<K>` before a training or inference change, and record
 which checkpoint, split hashes and metric aggregation produced each result.

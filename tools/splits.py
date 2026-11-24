@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Materialise and validate explicit v2 splits from the preserved legacy fold."""
+"""Materialise and validate the explicit splits from the original folds."""
 from __future__ import annotations
 
 import argparse
@@ -35,7 +35,7 @@ def validate(partitions: dict[str, list[str]]) -> dict[str, int]:
 def main() -> None:
     repo = Path(__file__).resolve().parents[1]
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--legacy-root', type=Path, required=True, help='Folder of the original fold lists.')
+    parser.add_argument('--folds-root', type=Path, required=True, help='Folder of the original fold lists.')
     parser.add_argument('--output-root', type=Path, default=repo/'splits')
     parser.add_argument('--fold', type=int, default=1)
     parser.add_argument('--name', type=str, default=None, help='Output directory name (default: fold<N>).')
@@ -44,9 +44,9 @@ def main() -> None:
     args = parser.parse_args()
     prefix = f'ct_cbct_mri_fold{args.fold}'
     source = {
-        'train': args.legacy_root/f'{prefix}_train_raw.txt',
-        'validation': args.legacy_root/f'{prefix}_val.txt',
-        'test': args.legacy_root/f'{prefix}_test.txt',
+        'train': args.folds_root/f'{prefix}_train_raw.txt',
+        'validation': args.folds_root/f'{prefix}_val.txt',
+        'test': args.folds_root/f'{prefix}_test.txt',
     }
     partitions = {name: read_cases(path) for name, path in source.items()}
     excluded: dict[str, list[str]] = {}
@@ -67,7 +67,7 @@ def main() -> None:
     fit = partitions['train'] + partitions['validation']
     (output/'fit.txt').write_text('\n'.join(fit) + '\n')
     manifest = {
-        'schema': 'impactseg-v2-explicit-splits/v1',
+        'schema': 'impactseg-explicit-splits/v1',
         'fold': args.fold,
         'source': {name: str(path.relative_to(repo)) for name, path in source.items()},
         'counts': counts,

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Instantiate the v2 ResEnc model and run forward, loss, backward and SGD safely."""
+"""Instantiate the ResEnc model and run forward, loss, backward and SGD safely."""
 from __future__ import annotations
 
 import argparse
@@ -12,9 +12,9 @@ import torch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from impactseg_v2.labels import FINE_NETWORK_OUTPUTS  # noqa: E402
-from impactseg_v2.losses import DiceNoBackground, DiceNoBackgroundAbsentAware, SegCrossEntropy  # noqa: E402
-from impactseg_v2.models import ImpactSegResidualEncoderUNet  # noqa: E402
+from impactseg.labels import FINE_NETWORK_OUTPUTS  # noqa: E402
+from impactseg.losses import DiceNoBackground, DiceNoBackgroundAbsentAware, SegCrossEntropy  # noqa: E402
+from impactseg.models import ImpactSegResidualEncoderUNet  # noqa: E402
 from konfai.network import network  # noqa: E402
 
 

@@ -18,7 +18,7 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from impactseg_v2.labels import (  # noqa: E402
+from impactseg.labels import (  # noqa: E402
     CONVENTION_ID,
     FINE_LABELS,
     MAP_559_LABELS,

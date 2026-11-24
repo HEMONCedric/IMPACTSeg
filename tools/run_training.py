@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Portable launcher: validate splits, resolve a v2 template, then invoke KonfAI."""
+"""Portable launcher: validate splits, resolve a template, then invoke KonfAI."""
 from __future__ import annotations
 
 import argparse
@@ -84,7 +84,7 @@ def main() -> None:
         'init_only': args.init_only,
     }, indent=2) + '\n')
     workflow = 'RESUME' if resume_checkpoint is not None else 'TRAIN'
-    command = [sys.executable, '-m', 'impactseg_v2.konfai_train', workflow, '-y', '--gpu', str(args.gpu), '--config', str(resolved),
+    command = [sys.executable, '-m', 'impactseg.konfai_train', workflow, '-y', '--gpu', str(args.gpu), '--config', str(resolved),
                '--checkpoints-dir', str(run_root/'checkpoints'), '--statistics-dir', str(run_root/'statistics')]
     if resume_checkpoint is not None:
         # Intentionally omit --lr: KonfAI restores the optimizer LR and

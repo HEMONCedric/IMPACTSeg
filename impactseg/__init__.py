@@ -1,4 +1,4 @@
-"""IMPACTSeg v2 extensions for the public KonfAI API."""
+"""IMPACTSeg extensions for the public KonfAI API."""
 
 from .labels import FINE_LABELS, MAP_559_LABELS
 

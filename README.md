@@ -58,7 +58,7 @@ impact-seg-konfai segment fine-3d -i image.nii.gz -o output/ --gpu 0     # or fi
 ```
 
 - `--ensemble 1` runs one fold instead of five: five times faster, and one checkpoint to download.
-- The same apps with the generic runner: `konfai-apps infer VBoussot/ImpactSeg:fine-3d -i image.nii.gz -o output/`.
+- The same apps with the generic runner: `konfai-apps infer HCedric/IMPACTSeg:fine-3d -i image.nii.gz -o output/`.
 - In 3D Slicer: the [IMPACT-Seg extension](https://github.com/vboussot/SlicerImpactSeg).
 
 You get a label map on the grid of your image; names are in [`configs/labels.json`](configs/labels.json). The app
@@ -139,7 +139,7 @@ partition contains them.
 ## Repository
 
 ```text
-impactseg_v2/   network, losses, sampling and augmentations
+impactseg/   network, losses, sampling and augmentations
 configs/        train_2p5d.yml, train_3d.yml, labels.json
 splits/         five train / validation / test splits, crosswalk to the Hugging Face cases
 tools/          dataset preparation, preprocessing, split validation, training launcher

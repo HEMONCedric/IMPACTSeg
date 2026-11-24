@@ -1,5 +1,5 @@
 {
-  "schema": "impactseg-v2-explicit-splits/v1",
+  "schema": "impactseg-explicit-splits/v1",
   "fold": 2,
   "source": {
     "train": "Code/training/splits/ct_cbct_mri_fold2_train_raw.txt",

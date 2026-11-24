@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate configs/labels.json from impactseg_v2/labels.py, the only source of the label definitions."""
+"""Regenerate configs/labels.json from impactseg/labels.py, the only source of the label definitions."""
 from __future__ import annotations
 
 import argparse
@@ -10,16 +10,16 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from impactseg_v2.labels import CONVENTION_ID, FINE_LABELS, MAP_559_LABELS, NOT_PREDICTED_FINE_IDS  # noqa: E402
+from impactseg.labels import CONVENTION_ID, FINE_LABELS, MAP_559_LABELS, NOT_PREDICTED_FINE_IDS  # noqa: E402
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "configs" / "labels.json")
     args = parser.parse_args()
-    source = ROOT / "impactseg_v2" / "labels.py"
+    source = ROOT / "impactseg" / "labels.py"
     value = {"schema": "impactseg-labels/v1", "convention_id": CONVENTION_ID,
-             "authoritative_source": "impactseg_v2/labels.py",
+             "authoritative_source": "impactseg/labels.py",
              "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
              "fine_map": {"foreground_classes": len(FINE_LABELS) - 1,
                           "network_outputs_including_background": len(FINE_LABELS), "labels": FINE_LABELS,

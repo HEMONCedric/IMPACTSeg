@@ -69,7 +69,7 @@ def main() -> None:
             (target_dir / f"{partition}.txt").write_text("".join(f"{c}\n" for c in kept[partition]))
         (target_dir / "fit.txt").write_text("".join(f"{c}\n" for c in kept["train"] + kept["validation"]))
         manifest = {
-            "schema": "impactseg-v2-explicit-splits/v1", "fold": fold,
+            "schema": "impactseg-explicit-splits/v1", "fold": fold,
             "source": {"split_dir": str(source_dir), "restricted_to": "cases available on the Hugging Face dataset"},
             "counts": {p: len(kept[p]) for p in PARTITIONS},
             "sha256": {p: sha256_text(target_dir / f"{p}.txt") for p in (*PARTITIONS, "fit")},

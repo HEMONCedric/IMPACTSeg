@@ -1,4 +1,4 @@
-"""Foreground-oriented patch sampling for the IMPACTSeg v2 training loader."""
+"""Foreground-oriented patch sampling for the IMPACTSeg training loader."""
 
 from __future__ import annotations
 

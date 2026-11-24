@@ -3,7 +3,7 @@
 # resampled to [1.5, 1.5, 2.0] mm by tools/preprocess_training_dataset.py.
 # All path tokens are resolved by tools/resolve_config.py; do not edit the resolved copy.
 Trainer:
-  train_name: IMPACTSeg_multimodal_resencm_2p5D_fold5_sgd_poly_v2
+  train_name: IMPACTSeg_multimodal_resencm_2p5D_fold5_sgd_poly
   manual_seed: 42
   epochs: 200
   autocast: true
@@ -18,7 +18,7 @@ Trainer:
   gpu_checkpoints: None
 
   Model:
-    classpath: impactseg_v2.models:ImpactSegResidualEncoderUNet
+    classpath: impactseg.models:ImpactSegResidualEncoderUNet
     ImpactSegResidualEncoderUNet:
       dim: 2
       in_channels: 5
@@ -58,7 +58,7 @@ Trainer:
           targets_criterions:
             mask_fine:
               criterions_loader:
-                impactseg_v2_losses:SegCrossEntropy:
+                impactseg_losses:SegCrossEntropy:
                   is_loss: true
                   group: 0
                   start: 0
@@ -72,7 +72,7 @@ Trainer:
           targets_criterions:
             mask_fine:
               criterions_loader:
-                impactseg_v2_losses:DiceNoBackground:
+                impactseg_losses:DiceNoBackground:
                   is_loss: true
                   group: 0
                   start: 0
@@ -82,7 +82,7 @@ Trainer:
                     Constant: {nb_step: 0}
                   smooth: 1.0e-06
                   only_present: true
-                impactseg_v2_losses:DiceNoBackgroundAbsentAware:
+                impactseg_losses:DiceNoBackgroundAbsentAware:
                   is_loss: true
                   group: 0
                   start: 0
@@ -92,7 +92,7 @@ Trainer:
                     Constant: {nb_step: 0}
                   smooth: 1.0e-06
                   coefficient: 0.20
-                impactseg_v2_losses:DiceNoBackgroundMetric:
+                impactseg_losses:DiceNoBackgroundMetric:
                   is_loss: false
                   group: 0
                   start: 0
@@ -106,7 +106,7 @@ Trainer:
           targets_criterions:
             mask_fine:
               criterions_loader:
-                impactseg_v2_losses:DiceNoBackground:
+                impactseg_losses:DiceNoBackground:
                   is_loss: true
                   group: 0
                   start: 0
@@ -121,7 +121,7 @@ Trainer:
           targets_criterions:
             mask_fine:
               criterions_loader:
-                impactseg_v2_losses:DiceNoBackground:
+                impactseg_losses:DiceNoBackground:
                   is_loss: true
                   group: 0
                   start: 0
@@ -164,17 +164,17 @@ Trainer:
             prob: 0.15
             b_std: 0.10
             groups: [image]
-          impactseg_v2.augmentations:SimulateLowResolution:
+          impactseg.augmentations:SimulateLowResolution:
             prob: 0.15
             factor_min: 1.0
             factor_max: 2.0
             groups: [image]
-          impactseg_v2.augmentations:GaussianNoise:
+          impactseg.augmentations:GaussianNoise:
             prob: 0.15
             std_min: 0.0
             std_max: 0.04
             groups: [image]
-          impactseg_v2.augmentations:GaussianBlur:
+          impactseg.augmentations:GaussianBlur:
             prob: 0.15
             sigma_min: 0.5
             sigma_max: 0.8

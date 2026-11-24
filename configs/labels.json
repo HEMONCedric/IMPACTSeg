@@ -1,7 +1,7 @@
 {
   "schema": "impactseg-labels/v1",
   "convention_id": "impactseg_ct_formalism_v3",
-  "authoritative_source": "impactseg_v2/labels.py",
+  "authoritative_source": "impactseg/labels.py",
   "source_sha256": "a5f6e4e3cc461375ba61a92efee9db7054681b2882659660d4f18afa566a1cf6",
   "fine_map": {
     "foreground_classes": 131,

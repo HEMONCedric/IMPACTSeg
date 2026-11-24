@@ -13,7 +13,7 @@ from ruamel.yaml import YAML
 ROOT = Path(__file__).resolve().parents[1]
 import sys
 sys.path.insert(0, str(ROOT))
-from impactseg_v2.labels import FINE_NETWORK_OUTPUTS, MAP_559_NETWORK_OUTPUTS  # noqa: E402
+from impactseg.labels import FINE_NETWORK_OUTPUTS, MAP_559_NETWORK_OUTPUTS  # noqa: E402
 
 TOKEN = re.compile(r'\$\{([A-Za-z_][A-Za-z0-9_]*)\}')
 

@@ -1,4 +1,4 @@
-"""KonfAI TRAIN entrypoint with the IMPACTSeg v2 Dataset override installed."""
+"""KonfAI TRAIN entrypoint with the IMPACTSeg Dataset override installed."""
 
 from __future__ import annotations
 
@@ -7,9 +7,9 @@ import math
 import os
 import runpy
 
-from impactseg_v2.sampling import ForegroundSamplingDataTrain
-from impactseg_v2.streaming import install_extend_slice_region_streaming_fix
-from impactseg_v2.checkpoint_retention import install_checkpoint_retention
+from impactseg.sampling import ForegroundSamplingDataTrain
+from impactseg.streaming import install_extend_slice_region_streaming_fix
+from impactseg.checkpoint_retention import install_checkpoint_retention
 
 
 class _IterationLimitedLoader:
@@ -82,7 +82,7 @@ def _install_iteration_limit(trainer) -> None:
 
 
 def install() -> None:
-    """Bind KonfAI's trainer annotation to the v2 dataset before YAML resolution."""
+    """Bind KonfAI's trainer annotation to the IMPACTSeg dataset before YAML resolution."""
 
     import konfai.trainer as trainer
 

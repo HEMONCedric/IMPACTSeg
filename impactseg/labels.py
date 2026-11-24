@@ -1,6 +1,6 @@
-"""The sole authoritative IMPACTSeg v2 label convention.
+"""The sole authoritative IMPACTSeg label convention.
 
-This module is intentionally data-only: all v2 validation, model configuration,
+This module is intentionally data-only: all validation, model configuration,
 and documentation derive class counts and names from these mappings.  It adopts
 the CT formalism introduced by ``task_2maps_labels_new.json`` and makes the
 historically omitted ``mask_559`` brain label explicit.
