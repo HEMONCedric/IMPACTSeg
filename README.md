@@ -31,7 +31,7 @@ level**, pelvic and limb bones, trunk muscles, and head-and-neck organs at risk.
 - **Fast.** A whole-body CT in 8.0 s (2.5D) or 14.8 s (3D) on one GPU with less than 6 GB of memory, all 126 structures at once: 10 to 70 times faster than the compared whole-body tools.
 - **A representation, not only a segmentation.** Used as the similarity of a registration, its last-decoder features
   rank **first on both multimodal Learn2Reg tasks** (MRI–CT and CBCT–CT, [below](#registration-learn2reg)).
-- **Open.** Data, weights and code: two networks (2.5D and 3D) × five folds, run with a plain `konfai PREDICTION`.
+- **Open.** Data, weights and code: two networks (2.5D and 3D) × five folds, run as KonfAI apps.
 
 <sub>Left: 3D network on a held-out whole-body CT (anterior and oblique views; lungs and large muscles translucent).</sub>
 
@@ -49,33 +49,8 @@ for multimodal registration. Images: MTBD / Multimodal-HC (Hinge et al., <i>Scie
 
 ## Quick start
 
-```bash
-# 1. KonfAI with NIfTI support (reference: Python 3.11, KonfAI 1.8.3, PyTorch 2.14)
-pip install "konfai[itk]==1.8.3" huggingface_hub
-
-# 2. Weights from Hugging Face (3D network; use 2_5D/** for the 2.5D one)
-python -c "from huggingface_hub import snapshot_download; snapshot_download('HCedric/IMPACTSeg', local_dir='hub', allow_patterns=['3D/**'])"
-
-# 3. Your volumes (CT, CBCT or MRI, any orientation): Dataset/<case>/image.nii.gz
-# 4. From the root of this repository:
-konfai PREDICTION --config configs/predict_3d.yml --models hub/3D/fold1/fold1.pt --gpu 0
-
-#    or the five-fold ensemble, recommended on new data:
-konfai PREDICTION --config configs/predict_3d.yml --models hub/3D/fold{1,2,3,4,5}/fold*.pt --gpu 0
-
-#    coarse body regions and tissues (download coarse/** instead)
-konfai PREDICTION --config configs/predict_coarse.yml --models hub/coarse/coarse.pt --gpu 0
-```
-
-You get `Predictions/IMPACTSeg_3D/Segmentations/<case>/mask_fine.nii.gz`, a label map on the grid of your image;
-names are in [`configs/labels.json`](configs/labels.json). Everything happens inside the configuration:
-reorientation, z-score normalization (no HU window, any modality), resampling to 1.5 × 1.5 × 2 mm, sliding-window
-inference with confidence-based patch fusion, and return to the native grid.
-
-## Run it as a KonfAI app
-
-The three models are also packaged as [KonfAI apps](https://huggingface.co/VBoussot/ImpactSeg): no configuration
-to write, and the weights download on first use. They need KonfAI 1.9.0 or later.
+The three models are packaged as [KonfAI apps](https://huggingface.co/VBoussot/ImpactSeg): no configuration to
+write, and the weights download on first use. They need KonfAI 1.9.0 or later.
 
 ```bash
 pip install impact_seg_konfai
@@ -86,8 +61,11 @@ impact-seg-konfai segment fine-3d -i image.nii.gz -o output/ --gpu 0     # or fi
 - The same apps with the generic runner: `konfai-apps infer VBoussot/ImpactSeg:fine-3d -i image.nii.gz -o output/`.
 - In 3D Slicer: the [IMPACT-Seg extension](https://github.com/vboussot/SlicerImpactSeg).
 
-The apps give the labels of the release's own `konfai PREDICTION`: the same voxels on a CT or CBCT in HU with the 3D
-networks, and at most 0.02 % of the foreground voxels apart on a float volume.
+You get a label map on the grid of your image; names are in [`configs/labels.json`](configs/labels.json). The app
+does the reorientation, z-score normalization (no HU window, any modality), resampling to 1.5 × 1.5 × 2 mm,
+sliding-window inference with confidence-based patch fusion, and the return to the native grid. Its labels are those
+behind the results reported here: the same voxels on a CT or CBCT in HU with the 3D networks, and at most 0.02 % of
+the foreground voxels apart on a float volume.
 
 ## Models
 
@@ -107,7 +85,7 @@ ensemble is the most accurate option on new data.
 The **coarse** network is a separate, light model (7 M parameters) for the 11 body-region and tissue classes of
 `mask_coarse` (subcutaneous tissue, muscle, abdominal and thoracic cavities, bones, glands, pericardium, breast implant,
 mediastinum, spinal cord, brain), trained on one split; on its 64 test volumes the Dice is 0.89 on CT, 0.86 on CBCT and
-0.81 on MRI (indicative, partly pseudo-labelled references). It writes `Predictions/IMPACTSeg_coarse/Segmentations/<case>/mask_coarse.nii.gz`.
+0.81 on MRI (indicative, partly pseudo-labelled references). It runs as the `coarse` app.
 
 ## Registration (Learn2Reg)
 
@@ -161,8 +139,8 @@ partition contains them.
 ## Repository
 
 ```text
-impactseg_v2/   network, losses, sampling, augmentations and KonfAI output classes
-configs/        train_2p5d.yml, train_3d.yml, predict_2p5d.yml, predict_3d.yml, predict_coarse.yml, labels.json
+impactseg_v2/   network, losses, sampling and augmentations
+configs/        train_2p5d.yml, train_3d.yml, labels.json
 splits/         five train / validation / test splits, crosswalk to the Hugging Face cases
 tools/          dataset preparation, preprocessing, split validation, training launcher
 ```
