@@ -49,7 +49,7 @@ for multimodal registration. Images: MTBD / Multimodal-HC (Hinge et al., <i>Scie
 
 ## Quick start
 
-The three models are packaged as [KonfAI apps](https://huggingface.co/VBoussot/ImpactSeg): no configuration to
+The three models are packaged as [KonfAI apps](https://huggingface.co/HCedric/IMPACTSeg): no configuration to
 write, and the weights download on first use. They need KonfAI 1.9.0 or later.
 
 ```bash
