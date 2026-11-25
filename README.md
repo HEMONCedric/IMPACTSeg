@@ -10,7 +10,7 @@ Dense whole-body anatomy in seconds, built for radiotherapy imaging.</p>
   <a href="https://huggingface.co/datasets/HCedric/IMPACTSeg"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20dataset-HCedric%2FIMPACTSeg-ffcc4d" alt="Hugging Face dataset"></a>
   <a href="https://github.com/fideus-labs/KonfAI"><img src="https://img.shields.io/badge/built%20with-KonfAI-3b82f6" alt="KonfAI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/code-Apache--2.0-22c55e" alt="Apache-2.0"></a>
-  <img src="https://img.shields.io/badge/paper-in%20preparation-9ca3af" alt="Paper in preparation">
+  <a href="https://arxiv.org/abs/2611.32903"><img src="[https://img.shields.io/badge/code-Apache--2.0-22c55e](https://img.shields.io/badge/paper-in%20preparation-9ca3af)" alt="Paper"></a>
 </p>
 
 <table>
