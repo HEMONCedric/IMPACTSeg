@@ -10,7 +10,7 @@ Dense whole-body anatomy in seconds, built for radiotherapy imaging.</p>
   <a href="https://huggingface.co/datasets/HCedric/IMPACTSeg"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20dataset-HCedric%2FIMPACTSeg-ffcc4d" alt="Hugging Face dataset"></a>
   <a href="https://github.com/fideus-labs/KonfAI"><img src="https://img.shields.io/badge/built%20with-KonfAI-3b82f6" alt="KonfAI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/code-Apache--2.0-22c55e" alt="Apache-2.0"></a>
-  <a href="https://arxiv.org/abs/2611.32903"><img src="[https://img.shields.io/badge/code-Apache--2.0-22c55e](https://img.shields.io/badge/paper-in%20preparation-9ca3af)" alt="Paper"></a>
+  <a href="https://arxiv.org/abs/2611.32903"><img src="https://img.shields.io/badge/arXiv-2611.32903-b31b1b" alt="Paper"></a>
 </p>
 
 <table>
@@ -152,5 +152,4 @@ licenses, several of them non-commercial: see the [dataset card](https://hugging
 Its reference masks come from automatic labelling, completion and manual review and correction; they are curated
 references, not exhaustive manual delineations. Research use only, not a clinically validated device.
 
-The manuscript is in preparation (C. Hémon, V. Boussot, M. McCormick, L. Zimmermann, C. Kurz, G. Landry); until then, please cite this
-repository ([CITATION.cff](CITATION.cff)).
+If you use IMPACT-Seg, its dataset, or its learned anatomical representations in your research, please cite our [paper](https://arxiv.org/abs/2611.32903).
