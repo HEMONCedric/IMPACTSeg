@@ -23,16 +23,18 @@ abdominal and thoracic organs, the five lung lobes, heart chambers and great ves
 level**, pelvic and limb bones, trunk muscles, and head-and-neck organs at risk.
 
 - **One model for three modalities.** No modality flag, no per-modality fine-tuning, the same 126 structures everywhere.
-- **Robust on CBCT.** On real CBCT the Dice reaches **0.84**, where the best compared method reaches 0.67, and
-  **0.58** on independent clinical pancreatic CBCT (0.49 for TotalSegmentator); the predictions on the planning CT and
-  on the registered real CBCT of the same patient agree at **0.88** Dice, against 0.49–0.69 for the compared methods.
-- **Consistent across modalities.** The same patient gets the same anatomy on CT, CBCT and MRI, which is what
-  adaptive radiotherapy needs.
-- **Fast.** A whole-body CT in 8.0 s (2.5D) or 14.8 s (3D) on one GPU with less than 6 GB of memory, all 126 structures at once: 10 to 70 times faster than the compared whole-body tools.
+- **Robust on CBCT.** On real CBCT, the Dice reaches **0.842**, compared with 0.671 for the strongest comparator. On independent
+  clinical pancreatic CBCT, gastrointestinal Dice reaches **0.735**, compared with 0.634 for TotalSegmentator.
+- **Consistent across modalities.** Prediction agreement reaches **0.881 on paired CT–CBCT** and **0.790 on paired CT–MRI**,
+  demonstrating the consistency of the learned anatomical representation across imaging modalities.
+- **Robust to modality shifts.** Across 497 voxel-aligned CT–CBCT pairs, segmentation Dice decreases by only **0.022** from CT
+  to simulated CBCT, compared with 0.153–0.178 for competing methods.
+- **Fast.** With a single model, whole-body CT segmentation takes 8.0 s (2.5D) or 14.8 s (3D), while CBCT and MRI take approximately 2 s, on one GPU with less than 6 GB of memory.
 - **A representation, not only a segmentation.** Used as the similarity of a registration, its last-decoder features
   rank **first on both multimodal Learn2Reg tasks** (MRI–CT and CBCT–CT, [below](#registration-learn2reg)).
-- **Open.** Data, weights and code: two networks (2.5D and 3D) × five folds, run as KonfAI apps.
-
+- **Open.** A curated dataset of **8,290 volumes**, pretrained weights for both architectures (2.5D and 3D, five folds each),
+  and reproducible training and inference code built with KonfAI.
+  
 <sub>Left: 3D network on a held-out whole-body CT (anterior and oblique views; lungs and large muscles translucent).</sub>
 
 </td>
@@ -69,11 +71,11 @@ the foreground voxels apart on a float volume.
 
 ## Models
 
-| | Input | Patch | Normalization | Checkpoint | Whole-body CT (RTX A6000, per volume) |
+| | Input | Patch | Normalization | Weights per fold | Whole-body CT (RTX A6000, single fold) |
 |---|---|---|---|---:|---|
-| **IMPACT-Seg 2.5D** | 5 adjacent axial slices | 288 × 288 | BatchNorm | 411 MB | 8.0 s · 5.7 GB |
-| **IMPACT-Seg 3D** | volume | 128 × 128 × 128 | InstanceNorm | 1.2 GB | 14.8 s · 4.4 GB |
-| **Coarse 3D** | volume at 3 mm | 128 × 128 × 128 | InstanceNorm | 57 MB | < 3 s · < 1 GB |
+| **IMPACT-Seg 2.5D** | 5 adjacent axial slices | 288 × 288 | BatchNorm | 206 MB | 8.0 s · 5.7 GB |
+| **IMPACT-Seg 3D** | volume | 128 × 128 × 128 | InstanceNorm | 608 MB | 14.8 s · 4.4 GB |
+| **Coarse 3D** | volume at 3 mm | 128 × 128 × 128 | InstanceNorm | 29 MB | < 3 s · < 1 GB |
 
 Both are six-stage residual-encoder U-Nets with 132 outputs (background + the 131 labels of the dataset; the cochleae,
 optic chiasm and optic nerves, a few tens of voxels at the training resolution, were not learned and are never output,
@@ -153,3 +155,17 @@ Its reference masks come from automatic labelling, completion and manual review 
 references, not exhaustive manual delineations. Research use only, not a clinically validated device.
 
 If you use IMPACT-Seg, its dataset, or its learned anatomical representations in your research, please cite our [paper](https://arxiv.org/abs/2611.32903).
+```bibtex
+@misc{hemon2026impactseg,
+  title         = {{IMPACT-Seg}: Consistent Anatomical Segmentation and
+                   Representation Learning Across {CT}, {CBCT}, and {MRI}},
+  author        = {H{\'e}mon, C{\'e}dric and Boussot, Valentin and
+                   McCormick, Matthew and Zimmermann, Lukas and
+                   Kurz, Christopher and Landry, Guillaume},
+  year          = {2026},
+  eprint        = {2611.32903},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CV},
+  url           = {https://arxiv.org/abs/2611.32903}
+}
+```
